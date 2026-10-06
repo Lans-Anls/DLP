@@ -1,0 +1,148 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Arquitetura da Esteira Controladora",
+    "output": "arquitetura-esteira.html",
+    "quality_profile": "showcase",
+    "viewBox": [1280, 760]
+  },
+  "components": [
+    {
+      "id": "entradas",
+      "type": "external",
+      "label": "Entradas da FPGA",
+      "sublabel": "clock e controles",
+      "tag": "clk_50 · rst · sentido · pausa · modo",
+      "pos": [40, 315],
+      "size": [190, 88]
+    },
+    {
+      "id": "divisor",
+      "type": "backend",
+      "label": "freq_div",
+      "sublabel": "Divisor de frequência",
+      "tag": "H_MAX",
+      "pos": [380, 150],
+      "size": [210, 88]
+    },
+    {
+      "id": "nucleo",
+      "type": "backend",
+      "label": "nucleo_esteira",
+      "sublabel": "Contagem N · pico P · erro",
+      "tag": "CAPACIDADE · LIMIAR",
+      "pos": [380, 385],
+      "size": [230, 100]
+    },
+    {
+      "id": "display",
+      "type": "backend",
+      "label": "display_esteira",
+      "sublabel": "Seleção de modo e 7 segmentos",
+      "tag": "hex0 · hex1",
+      "pos": [760, 385],
+      "size": [230, 100]
+    },
+    {
+      "id": "saidas",
+      "type": "external",
+      "label": "Saídas da FPGA",
+      "sublabel": "indicadores e displays",
+      "tag": "sinal_div · pulso · flags · hex",
+      "pos": [1050, 315],
+      "size": [190, 88]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "esteira_controlador · main.vhd",
+      "wraps": ["divisor", "nucleo", "display"],
+      "pad": 55
+    }
+  ],
+  "connections": [
+    {
+      "id": "clock-reset-divisor",
+      "from": "entradas",
+      "to": "divisor",
+      "label": "clk_50 · rst · pausa"
+    },
+    {
+      "id": "controles-nucleo",
+      "from": "entradas",
+      "to": "nucleo",
+      "label": "clk_50 · rst · sentido · pausa"
+    },
+    {
+      "id": "pulso-avanco",
+      "from": "divisor",
+      "to": "nucleo",
+      "label": "pulso_avanco",
+      "variant": "emphasis",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "id": "estado-display",
+      "from": "nucleo",
+      "to": "display",
+      "label": "N_atual · pico"
+    },
+    {
+      "id": "modo-display",
+      "from": "entradas",
+      "to": "display",
+      "label": "modo",
+      "fromSide": "top",
+      "toSide": "bottom",
+      "via": [[135, 90], [1280, 90], [1280, 550], [875, 550]]
+    },
+    {
+      "id": "sinais-temporais-saida",
+      "from": "divisor",
+      "to": "saidas",
+      "label": "sinal_div · pulso_avanco"
+    },
+    {
+      "id": "flags-saida",
+      "from": "nucleo",
+      "to": "saidas",
+      "label": "cheio · vazio · alerta · erro",
+      "labelAt": [634, 499]
+    },
+    {
+      "id": "segmentos-saida",
+      "from": "display",
+      "to": "saidas",
+      "label": "hex0 · hex1"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Temporização",
+      "items": [
+        "freq_div alterna sinal_div a cada H_MAX ciclos",
+        "pulso_avanco ocorre na borda de subida"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Estado da esteira",
+      "items": [
+        "N representa a quantidade atual; P guarda o pico",
+        "Erro fica travado após tentativa inválida"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Visualização",
+      "items": [
+        "modo seleciona N, CAPACIDADE-N, P ou CAPACIDADE",
+        "hex0 e hex1 usam segmentos ativos em nível baixo"
+      ]
+    }
+  ]
+}
